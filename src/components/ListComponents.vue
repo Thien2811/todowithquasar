@@ -1,8 +1,25 @@
 <template>
   <div class="containerr" style="border: 3px solid white; width: 1000px">
     <div class="listenname">{{ listname }}</div>
-    <q-btn v-if="!taskAddMode" @click="toggleAddTask" label="-" color="white" text-color="black" />
-    <q-btn v-if="taskAddMode" @click="toggleAddTask" label="+" color="white" text-color="black" />
+    <q-form style="display: flex" class="flex-center">
+      <q-btn
+        v-if="!taskAddMode"
+        @click="toggleAddTask"
+        icon="add"
+        color="white"
+        text-color="black"
+        style="margin-right: 15px"
+      />
+      <q-btn
+        v-if="taskAddMode"
+        @click="toggleAddTask"
+        icon="remove"
+        color="white"
+        text-color="black"
+        style="margin-right: 15px"
+      />
+      <q-btn @click="$emit('delete', id)" icon="delete" color="white" text-color="black" />
+    </q-form>
     <div class="add-task" v-if="!taskAddMode">
       <div class="addTask flex-nowrap" style="padding: 0px">
         <q-input standout v-model="taskname" label="Taskname" bg-color="white" filled />
@@ -88,13 +105,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, toRef } from 'vue'
 import TaskComponent from './TaskComponent.vue'
 import '@vuepic/vue-datepicker/dist/main.css'
 
 const date = ref()
 
-defineProps(['listname'])
+const props = defineProps(['listname', 'list'])
+
+defineEmits('delete')
 
 const taskAddMode = ref(false)
 const options = ['Hoch', 'Mittel', 'Niedrig']
@@ -116,7 +135,7 @@ const taskname = ref()
 const priority = ref('Priorität')
 const aufgabenbeschreibung = ref('')
 const person = ref('Zugehörige Person')
-const liste = ref([])
+const liste = toRef(props.list)
 
 function toggleAddTask() {
   taskAddMode.value = !taskAddMode.value
@@ -128,9 +147,10 @@ function addNewTask() {
     priority: priority.value,
     aufgabenbeschreibung: aufgabenbeschreibung.value,
     person: person.value,
-    date: date.value.toLocaleString('de').split(', ')[0]
+    date: date.value?.toLocaleString('de').split(', ')[0]
   })
   liste.value = liste.value.sort((a, b) => getPriorityInt(b.priority) - getPriorityInt(a.priority))
+  console.log(liste.value)
 }
 function getPriorityInt(priority) {
   switch (priority) {

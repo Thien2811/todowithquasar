@@ -12,6 +12,7 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "@vuepic/vue-datepicker": "^7.4.0",
+    "axios": "^1.6.2",
     "quasar": "^2.0.0",
     "vue": "^3.3.10",
     "vue-reactive-storage": "github:ropbla9/vue-reactive-storage",

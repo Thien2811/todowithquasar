@@ -14,19 +14,21 @@
             class="q-mr-md"
             style="max-width: 300px"
           >
-            <q-btn
-              standout
-              color="white"
-              text-color="black"
-              flat
-              round
-              icon="add"
-              @click="addNewList"
-              :disable="listname.length < 1"
-          /></q-input>
+            <template v-slot:append>
+              <q-btn
+                standout
+                color="white"
+                text-color="black"
+                flat
+                round
+                icon="add"
+                @click="addNewList"
+                :disable="listname.length < 1"
+              /> </template
+          ></q-input>
 
           <q-input
-            v-if="allLists.length > 0"
+            v-if="allLists.length > 1"
             standout
             label="Suche"
             style="max-width: 300px"
@@ -34,21 +36,36 @@
             bg-color="white"
             filled
           >
-            <q-btn
-              standout
-              icon="search"
-              flat
-              round
-              @click="search"
-              color="white"
-              text-color="black"
-            ></q-btn>
+            <template v-slot:append>
+              <q-btn
+                standout
+                icon="search"
+                flat
+                round
+                @click="search"
+                color="white"
+                text-color="black"
+              ></q-btn>
+            </template>
           </q-input>
+
+          <q-btn
+            icon="save"
+            @click="save"
+            color="white"
+            text-color="black"
+            style="margin-left: 10px"
+            size="21.5px"
+          ></q-btn>
         </q-form>
       </div>
       <carousel :items-to-show="1" ref="list" v-if="allLists.length > 0" wrap-around>
         <slide v-for="(liste, index) of allLists" :key="index">
-          <ListComponents :listname="liste.listname" />
+          <ListComponents
+            :listname="liste.listname"
+            :list="liste.tasks"
+            @delete="removeList($event)"
+          />
         </slide>
 
         <template #addons>
@@ -64,25 +81,39 @@
 
 <script setup>
 import ListComponents from '@/components/ListComponents.vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import 'vue3-carousel/dist/carousel.css'
 import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
+import axios from 'axios'
 
 const listname = ref('')
-const liste = ref([])
 const allLists = ref([])
 const list = ref(null)
 const searchValue = ref('')
 
+onMounted(async () => {
+  const res = await axios.get('/list')
+  allLists.value = res.data.lists
+})
+
+async function save() {
+  await axios.post('/savelist', { lists: allLists.value })
+}
+
 function addNewList() {
   allLists.value.push({
     listname: listname.value,
-    tasks: liste.value
+    tasks: ref([])
   })
 }
 
 function search() {
   list.value.slideTo(allLists.value.findIndex((el) => el.listname === searchValue.value))
+}
+
+function removeList(id) {
+  const i = allLists.value.findIndex((e) => e.id === id)
+  allLists.value.splice(i, 1)
 }
 </script>
 
