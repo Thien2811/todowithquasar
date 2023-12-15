@@ -1,0 +1,4 @@
+
+.carousel .carousel__track > *:not(.carousel__slide--visible) {
+    height: 1px;
+  }

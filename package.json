@@ -1,0 +1,32 @@
+{
+  "name": "todo_new",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+    "dev": "vite",
+    "format": "prettier --write src/",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.0.0",
+    "@vuepic/vue-datepicker": "^7.4.0",
+    "quasar": "^2.0.0",
+    "vue": "^3.3.10",
+    "vue-reactive-storage": "github:ropbla9/vue-reactive-storage",
+    "vue-router": "^4.2.5",
+    "vue3-carousel": "^0.3.1"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-patch": "^1.3.3",
+    "@vitejs/plugin-vue": "^4.5.1",
+    "@vue/eslint-config-prettier": "^8.0.0",
+    "eslint": "^8.49.0",
+    "eslint-plugin-vue": "^9.17.0",
+    "prettier": "^3.0.3",
+    "vite": "^5.0.5",
+    "vue-cli-plugin-quasar": "~5.0.2"
+  },
+  "type": "module"
+}
