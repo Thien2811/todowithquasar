@@ -1,11 +1,11 @@
 <template>
-  <div class="containerr" style="border: 3px solid white; width: 1000px">
-    <div class="listenname">{{ listname }}</div>
+  <div class="containerr" style="width: 1000px; padding: 10px">
+    <div class="listenname">{{ list.listname }}</div>
     <q-form style="display: flex" class="flex-center">
       <q-btn
         v-if="!taskAddMode"
         @click="toggleAddTask"
-        icon="add"
+        icon="remove"
         color="white"
         text-color="black"
         style="margin-right: 15px"
@@ -13,12 +13,12 @@
       <q-btn
         v-if="taskAddMode"
         @click="toggleAddTask"
-        icon="remove"
+        icon="add"
         color="white"
         text-color="black"
         style="margin-right: 15px"
       />
-      <q-btn @click="$emit('delete', id)" icon="delete" color="white" text-color="black" />
+      <q-btn @click="$emit('delete', list.id)" icon="delete" color="white" text-color="black" />
     </q-form>
     <div class="add-task" v-if="!taskAddMode">
       <div class="addTask flex-nowrap" style="padding: 0px">
@@ -87,19 +87,11 @@
       </div>
     </div>
     <TaskComponent
-      v-for="(i, index) of liste"
+      v-for="(i, index) of liste.tasks"
       :key="index"
-      :taskname="i.taskname"
-      :priority="i.priority"
-      :aufgabenbeschreibung="i.aufgabenbeschreibung"
-      :person="i.person"
-      :date="i.date"
-      :createDate="i.createDate"
-      :time="i.time"
-      @editname="liste[index].taskname = $event"
-      @editbeschreibung="liste[index].aufgabenbeschreibung = $event"
+      :task="i"
       @delete="remove($event)"
-      @taskUpdate="editTaskAufgabe(event)"
+      @save="$emit('save')"
     ></TaskComponent>
   </div>
 </template>
@@ -111,9 +103,9 @@ import '@vuepic/vue-datepicker/dist/main.css'
 
 const date = ref()
 
-const props = defineProps(['listname', 'list'])
+const props = defineProps(['list'])
 
-defineEmits('delete')
+const emits = defineEmits(['delete', 'save'])
 
 const taskAddMode = ref(false)
 const options = ['Hoch', 'Mittel', 'Niedrig']
@@ -142,15 +134,27 @@ function toggleAddTask() {
 }
 
 function addNewTask() {
-  liste.value.push({
+  var newId = 1
+
+  if (liste.value.length > 0) {
+    var ids = liste.value.map((l) => l.id)
+    var max = Math.max(...ids)
+    newId = max + 1
+  }
+
+  liste.value.tasks.push({
+    id: newId,
     taskname: taskname.value,
     priority: priority.value,
     aufgabenbeschreibung: aufgabenbeschreibung.value,
     person: person.value,
     date: date.value?.toLocaleString('de').split(', ')[0]
   })
-  liste.value = liste.value.sort((a, b) => getPriorityInt(b.priority) - getPriorityInt(a.priority))
-  console.log(liste.value)
+  liste.value.tasks = liste.value.tasks.sort(
+    (a, b) => getPriorityInt(b.priority) - getPriorityInt(a.priority)
+  )
+
+  emits('save')
 }
 function getPriorityInt(priority) {
   switch (priority) {
@@ -164,8 +168,9 @@ function getPriorityInt(priority) {
 }
 
 function remove(id) {
-  const i = liste.value.findIndex((e) => e.id === id)
-  liste.value.splice(i, 1)
+  const i = liste.value.tasks.findIndex((e) => e.id === id)
+  liste.value.tasks.splice(i, 1)
+  emits('save')
 }
 </script>
 
@@ -182,6 +187,10 @@ function remove(id) {
 
 div {
   margin-top: 10px;
+}
+
+.containerr {
+  min-height: 900px;
 }
 </style>
 

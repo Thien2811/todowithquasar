@@ -1,5 +1,7 @@
 <template>
-  <h1 style="text-align: center; color: white; font-weight: bold; margin-top: 20px">ToDo-Liste</h1>
+  <h1 style="text-align: center; color: white; font-weight: bold; margin-top: 20px">
+    Listen oder Tasks hinzufügen
+  </h1>
   <br />
   <div style="width: 100%">
     <div class="containerr" style="margin: auto">
@@ -48,24 +50,11 @@
               ></q-btn>
             </template>
           </q-input>
-
-          <q-btn
-            icon="save"
-            @click="save"
-            color="white"
-            text-color="black"
-            style="margin-left: 10px"
-            size="21.5px"
-          ></q-btn>
         </q-form>
       </div>
-      <carousel :items-to-show="1" ref="list" v-if="allLists.length > 0" wrap-around>
+      <carousel :items-to-show="1" ref="myCarousel" wrap-around>
         <slide v-for="(liste, index) of allLists" :key="index">
-          <ListComponents
-            :listname="liste.listname"
-            :list="liste.tasks"
-            @delete="removeList($event)"
-          />
+          <ListComponents :list="liste" @delete="removeList($event)" @save="save" />
         </slide>
 
         <template #addons>
@@ -81,15 +70,39 @@
 
 <script setup>
 import ListComponents from '@/components/ListComponents.vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import 'vue3-carousel/dist/carousel.css'
 import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 import axios from 'axios'
+import { useRoute } from 'vue-router'
+
+defineEmits(['delete'])
+
+// if(url === l)
 
 const listname = ref('')
 const allLists = ref([])
-const list = ref(null)
+const myCarousel = ref(null)
 const searchValue = ref('')
+
+const router = useRoute()
+const url = router.query.listenname
+
+// if (typeof url == 'string' && allLists.value.length > 0) {
+//   console.log(url)
+//   searchValue.value = url
+//   search()
+//   console.log('1')
+// } else {
+//   console.log('2')
+// }
+
+watch(allLists, (newValue) => {
+  if (newValue.length > 0 && typeof url == 'string') {
+    searchValue.value = url
+    search()
+  }
+})
 
 onMounted(async () => {
   const res = await axios.get('/list')
@@ -100,28 +113,40 @@ async function save() {
   await axios.post('/savelist', { lists: allLists.value })
 }
 
-function addNewList() {
+async function addNewList() {
+  var newId = 1
+
+  if (allLists.value.length > 0) {
+    var ids = allLists.value.map((l) => l.id)
+    var max = Math.max(...ids)
+    newId = max + 1
+  }
+
   allLists.value.push({
+    id: newId,
     listname: listname.value,
     tasks: ref([])
   })
-}
 
+  console.log(allLists.value)
+
+  await axios.post('/savelist', { lists: allLists.value })
+}
 function search() {
-  list.value.slideTo(allLists.value.findIndex((el) => el.listname === searchValue.value))
+  myCarousel.value.slideTo(allLists.value.findIndex((el) => el.listname === searchValue.value))
 }
 
-function removeList(id) {
+async function removeList(id) {
   const i = allLists.value.findIndex((e) => e.id === id)
   allLists.value.splice(i, 1)
+  await axios.post('/savelist', { lists: allLists.value })
 }
 </script>
 
 <style scoped>
 .containerr {
-  border: 3px solid white;
   padding: 10px;
-  background-color: black;
+  background-color: #141010;
   min-height: 900px;
 }
 

@@ -1,23 +1,22 @@
 <template>
-  <div class="container rounded-3" :style="getPriorityStyle(priority)" v-if="progress != 100">
+  <div class="container" :style="getPriorityStyle(task.priority)">
     <div>
       Aufgabe:
-      <span v-if="!editMode">{{ taskname }}</span>
-      <span v-if="editMode">
-        <input class="form-control" v-model="tasknameC" />
+      <span v-if="!editMode">{{ task.taskname }}</span>
+      <span v-else>
+        <input class="form-control" v-model="task.taskname" />
       </span>
     </div>
     <div style="overflow: hidden" class="beschreibung">
       Beschreibung:
-      <span v-if="!editMode">{{ aufgabenbeschreibungC }}</span>
-
-      <span v-if="editMode">
-        <textarea class="form-control" v-model="aufgabenbeschreibungC" type="text"></textarea>
+      <span v-if="!editMode">{{ task.aufgabenbeschreibung }}</span>
+      <span v-else>
+        <textarea class="form-control" v-model="task.aufgabenbeschreibung" type="text"></textarea>
       </span>
     </div>
     <div>
       Zugeörige Person(en):
-      <span>{{ person }}</span>
+      <span>{{ task.person }}</span>
     </div>
     <div>
       Status:
@@ -31,7 +30,7 @@
     </div>
     <div>
       Fälligkeitsdatum:
-      <span>{{ date }}</span>
+      <span>{{ task.date }}</span>
     </div>
 
     <div>
@@ -40,42 +39,28 @@
       <label style="margin-left: 10px"> {{ progress }}% </label>
     </div>
     <div>
-      <button class="bearbeiten" @click="switchEditMode()">Bearbeiten</button>
+      <button v-if="!editMode" class="bearbeiten" @click="switchEditMode()">Bearbeiten</button>
+      <button v-if="editMode" class="bearbeiten" @click="switchEditMode()">Speichern</button>
       <button class="bearbeiten" @click="$emit('delete', id)">Löschen</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref, toRef } from 'vue'
 
-const emits = defineEmits(['delete', 'editname', 'editbeschreibung'])
-const props = defineProps([
-  'id',
-  'taskname',
-  'priority',
-  'aufgabenbeschreibung',
-  'person',
-  'date',
-  'time'
-])
+const emits = defineEmits(['delete', 'save'])
+const props = defineProps(['task'])
 
 const progress = ref(0)
 const editMode = ref(false)
-const aufgabenbeschreibungC = ref('')
-const tasknameC = ref('')
+const task = toRef(props.task)
 const createDate = new Date(Date.now())
 const dateNow = createDate.toLocaleString('de').split(',')[0]
 
-onMounted(() => {
-  aufgabenbeschreibungC.value = props.aufgabenbeschreibung
-  tasknameC.value = props.taskname
-})
-
 function switchEditMode() {
   editMode.value = !editMode.value
-  if (!editMode.value) emits('editname', tasknameC)
-  emits('editbeschreibung', aufgabenbeschreibungC)
+  emits('save')
 }
 
 function getPriorityStyle(priority) {
@@ -93,7 +78,13 @@ function getPriorityStyle(priority) {
 <style scoped>
 .container {
   background-color: black;
-  width: 100%;
+  margin-left: 10px;
+  margin-right: 10px;
+  border-radius: 5px;
+}
+
+.container:hover {
+  transform: scale(1.025);
 }
 
 div {

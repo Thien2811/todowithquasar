@@ -1,24 +1,74 @@
 <template>
-  <div>
+  <div style="background-color: #141010">
     <q-layout view="hHh Lpr lff" container style="height: 100vh" class="shadow-2 rounded-borders">
       <q-header elevated :class="$q.dark.isActive ? 'bg-secondary' : 'bg-black'">
         <q-toolbar>
-          <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
-          <q-toolbar-title>ToDo</q-toolbar-title>
+          <q-toolbar-title>ToDo-Liste</q-toolbar-title>
+          <q-btn-dropdown color="primary" icon="person">
+            <q-list>
+              <q-item clickable v-close-popup text-color="black" filled v-if="!loginstatus">
+                <q-item-section>
+                  <q-item-label>Test</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup v-if="!loginstatus">
+                <q-item-section>
+                  <q-item-label>Test2</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup @click="changeLoginStatus" v-if="loginstatus">
+                <q-item-section>
+                  <q-item-label>Einloggen</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup @click="changeLoginStatus" v-if="!loginstatus">
+                <q-item-section>
+                  <q-item-label>Ausloggen</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
         </q-toolbar>
       </q-header>
 
       <q-drawer
         v-model="drawer"
         show-if-above
-        :width="200"
+        :width="75"
         :breakpoint="500"
-        bordered
-        :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-black'"
+        :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-slategrey'"
+        style="color: black; background: black"
       >
-        <q-btn @click="moveToAllTasks" label="Alle Listen anzeigen" />
-        <q-btn @click="moveToCreateTaskAndList" label="Liste/Task hinzufügen" />
-        <q-btn @click="moveToCompletedTaskList" label="Abgeschlossene Tasks" />
+        <div class="button">
+          <q-btn
+            size="150%"
+            standout
+            color="primary"
+            @click="moveToAllTasks"
+            icon="format_list_numbered"
+          />
+        </div>
+        <div class="button">
+          <q-btn
+            size="150%"
+            standout
+            color="primary"
+            @click="moveToCreateTaskAndList"
+            icon="playlist_add"
+          />
+        </div>
+        <div class="button">
+          <q-btn
+            size="150%"
+            standout
+            color="primary"
+            @click="moveToCompletedTaskList"
+            icon="checked"
+          />
+        </div>
       </q-drawer>
 
       <q-page-container>
@@ -35,6 +85,7 @@ import { ref } from 'vue'
 import router from './router'
 
 const drawer = ref()
+const loginstatus = ref(true)
 
 function moveToAllTasks() {
   router.push('/alltask')
@@ -45,6 +96,24 @@ function moveToCreateTaskAndList() {
 }
 
 function moveToCompletedTaskList() {
-  router.push()
+  router.push('/finishedtask')
+}
+
+function changeLoginStatus() {
+  loginstatus.value = !loginstatus.value
+  if (loginstatus.value) {
+    router.push('/')
+  }
 }
 </script>
+
+<style scoped>
+.button {
+  margin-top: 20px;
+}
+
+.q-item {
+  color: black;
+  text-align: center;
+}
+</style>
